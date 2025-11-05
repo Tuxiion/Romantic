@@ -69,13 +69,6 @@ export default function FloatingTabBar({
       >
         {tabs.map((tab, index) => {
           const isActive = pathname.includes(tab.name);
-          const scale = useSharedValue(isActive ? 1 : 0.9);
-
-          const animatedStyle = useAnimatedStyle(() => {
-            return {
-              transform: [{ scale: withSpring(scale.value) }],
-            };
-          });
 
           return (
             <TouchableOpacity
@@ -84,7 +77,7 @@ export default function FloatingTabBar({
               onPress={() => handleTabPress(tab.route)}
               activeOpacity={0.7}
             >
-              <Animated.View style={[styles.tabContent, animatedStyle]}>
+              <Animated.View style={styles.tabContent}>
                 <View
                   style={[
                     styles.iconContainer,
