@@ -1,78 +1,39 @@
-import React from "react";
-import { Stack, Link } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View, Text, Alert, Platform } from "react-native";
-import { IconSymbol } from "@/components/IconSymbol";
-import { GlassView } from "expo-glass-effect";
-import { useTheme } from "@react-navigation/native";
 
-const ICON_COLOR = "#007AFF";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  Pressable,
+} from 'react-native';
+import { Stack, router } from 'expo-router';
+import { colors } from '@/styles/commonStyles';
+import { IconSymbol } from '@/components/IconSymbol';
+import PhotoCard from '@/components/PhotoCard';
+import { usePhotos } from '@/contexts/PhotoContext';
+import * as Haptics from 'expo-haptics';
 
 export default function HomeScreen() {
-  const theme = useTheme();
-  const modalDemos = [
-    {
-      title: "Standard Modal",
-      description: "Full screen modal presentation",
-      route: "/modal",
-      color: "#007AFF",
-    },
-    {
-      title: "Form Sheet",
-      description: "Bottom sheet with detents and grabber",
-      route: "/formsheet",
-      color: "#34C759",
-    },
-    {
-      title: "Transparent Modal",
-      description: "Overlay without obscuring background",
-      route: "/transparent-modal",
-      color: "#FF9500",
-    }
-  ];
+  const { photos, deletePhoto } = usePhotos();
 
-  const renderModalDemo = ({ item }: { item: (typeof modalDemos)[0] }) => (
-    <GlassView style={[
-      styles.demoCard,
-      Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-    ]} glassEffectStyle="regular">
-      <View style={[styles.demoIcon, { backgroundColor: item.color }]}>
-        <IconSymbol name="square.grid.3x3" color="white" size={24} />
-      </View>
-      <View style={styles.demoContent}>
-        <Text style={[styles.demoTitle, { color: theme.colors.text }]}>{item.title}</Text>
-        <Text style={[styles.demoDescription, { color: theme.dark ? '#98989D' : '#666' }]}>{item.description}</Text>
-      </View>
-      <Link href={item.route as any} asChild>
-        <Pressable>
-          <GlassView style={[
-            styles.tryButton,
-            Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)' }
-          ]} glassEffectStyle="clear">
-            <Text style={[styles.tryButtonText, { color: theme.colors.primary }]}>Try It</Text>
-          </GlassView>
-        </Pressable>
-      </Link>
-    </GlassView>
-  );
+  const handleAddPhoto = () => {
+    console.log('Navigating to upload screen');
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push('/(tabs)/upload');
+  };
+
+  const handleDeletePhoto = (id: string) => {
+    console.log('Deleting photo:', id);
+    deletePhoto(id);
+  };
 
   const renderHeaderRight = () => (
-    <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
-      style={styles.headerButtonContainer}
-    >
-      <IconSymbol name="plus" color={theme.colors.primary} />
-    </Pressable>
-  );
-
-  const renderHeaderLeft = () => (
-    <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
-      style={styles.headerButtonContainer}
-    >
-      <IconSymbol
-        name="gear"
-        color={theme.colors.primary}
-      />
+    <Pressable onPress={handleAddPhoto} style={styles.headerButtonContainer}>
+      <IconSymbol name="plus" color={colors.primary} />
     </Pressable>
   );
 
@@ -81,24 +42,56 @@ export default function HomeScreen() {
       {Platform.OS === 'ios' && (
         <Stack.Screen
           options={{
-            title: "Building the app...",
+            title: 'Romantic Memories',
             headerRight: renderHeaderRight,
-            headerLeft: renderHeaderLeft,
           }}
         />
       )}
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <FlatList
-          data={modalDemos}
-          renderItem={renderModalDemo}
-          keyExtractor={(item) => item.route}
+      <View style={styles.container}>
+        <ScrollView
           contentContainerStyle={[
-            styles.listContainer,
-            Platform.OS !== 'ios' && styles.listContainerWithTabBar
+            styles.scrollContent,
+            Platform.OS !== 'ios' && styles.scrollContentWithTabBar,
           ]}
-          contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
-        />
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <IconSymbol name="heart.fill" size={40} color={colors.primary} />
+            <Text style={styles.title}>Our Love Story</Text>
+            <Text style={styles.subtitle}>
+              {photos.length} {photos.length === 1 ? 'Memory' : 'Memories'} Captured
+            </Text>
+          </View>
+
+          {/* Empty State */}
+          {photos.length === 0 && (
+            <View style={styles.emptyState}>
+              <IconSymbol name="photo.on.rectangle" size={80} color={colors.textSecondary} />
+              <Text style={styles.emptyTitle}>No Memories Yet</Text>
+              <Text style={styles.emptyText}>
+                Start capturing your romantic moments by adding your first photo!
+              </Text>
+              <Pressable onPress={handleAddPhoto} style={styles.addButton}>
+                <IconSymbol name="plus.circle.fill" size={24} color="#FFFFFF" />
+                <Text style={styles.addButtonText}>Add First Memory</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {/* Photo Grid */}
+          {photos.length > 0 && (
+            <View style={styles.photoGrid}>
+              {photos.map((photo) => (
+                <PhotoCard
+                  key={photo.id}
+                  photo={photo}
+                  onDelete={() => handleDeletePhoto(photo.id)}
+                />
+              ))}
+            </View>
+          )}
+        </ScrollView>
       </View>
     </>
   );
@@ -107,55 +100,71 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor handled dynamically
+    backgroundColor: colors.background,
   },
-  listContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+  scrollContent: {
+    padding: 20,
   },
-  listContainerWithTabBar: {
-    paddingBottom: 100, // Extra padding for floating tab bar
+  scrollContentWithTabBar: {
+    paddingBottom: 100,
   },
-  demoCard: {
-    borderRadius: 12,
-    padding: 16,
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: colors.text,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 20,
     marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  addButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    boxShadow: '0px 4px 12px rgba(233, 30, 99, 0.3)',
+    elevation: 6,
   },
-  demoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  demoContent: {
-    flex: 1,
-  },
-  demoTitle: {
+  addButtonText: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 4,
-    // color handled dynamically
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
-  demoDescription: {
-    fontSize: 14,
-    lineHeight: 18,
-    // color handled dynamically
+  photoGrid: {
+    gap: 20,
   },
   headerButtonContainer: {
     padding: 6,
-  },
-  tryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  tryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    // color handled dynamically
   },
 });
