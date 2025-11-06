@@ -82,9 +82,21 @@ const TabItem = ({ tab, isActive, onPress }: TabItemProps) => {
     };
   });
 
+  // Check if this is the upload tab
+  const isUploadTab = tab.name === 'upload';
+
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.tabButton}>
       <Animated.View style={[styles.tabContent, animatedStyle]}>
+        {isUploadTab && (
+          <View style={styles.uploadIconContainer}>
+            <IconSymbol
+              name="arrow.up.circle.fill"
+              size={20}
+              color={isActive ? colors.primary : colors.textSecondary}
+            />
+          </View>
+        )}
         <View
           style={[
             styles.iconContainer,
@@ -143,6 +155,9 @@ const styles = StyleSheet.create({
   tabContent: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  uploadIconContainer: {
+    marginBottom: 2,
   },
   iconContainer: {
     width: 48,

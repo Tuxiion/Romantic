@@ -24,8 +24,8 @@ import * as WebBrowser from 'expo-web-browser';
 // Required for web-based authentication
 WebBrowser.maybeCompleteAuthSession();
 
-// Google OAuth configuration
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+// Google OAuth configuration - Updated with your Client ID
+const GOOGLE_CLIENT_ID = '1012013851449-lpuk4528h5nfk5fojdpmumdp3ogb79h6.apps.googleusercontent.com';
 
 const discovery = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -115,21 +115,6 @@ export default function ProfileScreen() {
   const handleGoogleSignIn = async () => {
     console.log('Initiating Google Sign-In...');
     
-    // Check if Google Client ID is configured
-    if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
-      Alert.alert(
-        'Configuration Required',
-        'Google Sign-In requires configuration:\n\n' +
-        '1. Create a Google Cloud project\n' +
-        '2. Enable Google+ API\n' +
-        '3. Create OAuth 2.0 credentials\n' +
-        '4. Add your Client ID to profile.tsx\n\n' +
-        'For now, this is a demo feature.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -263,7 +248,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    paddingBottom: 100,
+    paddingBottom: 140,
   },
   header: {
     alignItems: 'center',

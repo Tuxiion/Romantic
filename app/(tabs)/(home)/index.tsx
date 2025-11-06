@@ -104,9 +104,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 40,
   },
   scrollContentWithTabBar: {
-    paddingBottom: 100,
+    paddingBottom: 140,
   },
   header: {
     alignItems: 'center',
